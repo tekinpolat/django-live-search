@@ -1,0 +1,81 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" >
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css" integrity="sha256-h20CPZ0QyXlBuAw7A+KluUYx/3pK+c7lYEpqLTlxjYQ=" crossorigin="anonymous" />
+
+    <title>Django Live Search</title>
+  </head>
+  <body>
+      <div class="container">
+          <div class="row mt-3">
+              <div class="col-md-12">
+					{% csrf_token %}
+                    <div class="input-group input-group-lg">
+                        <div class="input-group-prepend">
+							<span class="input-group-text" id="inputGroup-sizing-lg">
+								<i class="fas fa-search"></i>
+							</span>
+                        </div>
+                        <input type="text" class="form-control" id="search">
+                    </div>
+			  </div>
+			  <div class="col-md-12">
+				<table class="table">
+					<thead>
+					  <tr>
+						<th scope="col">#</th>
+						<th scope="col">Name</th>
+						<th scope="col">Surname</th>
+					  </tr>
+					</thead>
+					<tbody id="resultdata">
+					  
+					</tbody>
+				  </table>
+			  </div>
+          </div>
+      </div>
+    
+    <script src="{% static  'js/jquery-3.5.1.min.js' %}" ></script>
+    <script src="{% static  'popper.min.js' %}"></script>
+    <script src="{% static  'js/bootstrap.min.js' %}"></script>
+    <script>
+        $(document).ready(function(){
+			getData('');
+
+			//arama 
+			$('#search').keyup(function(){
+				const search = $(this).val().trim();
+				console.log(search);
+				getData(search)
+			});
+		});
+		
+		function getData(search)
+		{
+			const csrfmiddlewaretoken = $('[name="csrfmiddlewaretoken"]').val();
+			$.post('{% url "getdata" %}', {search:search,csrfmiddlewaretoken:csrfmiddlewaretoken}, function(response){
+				let dataHTML = '';
+				for (const row of response.persons){
+					console.log(row)
+					dataHTML += `
+						<tr>
+							<th>${row.pk}</th>
+							<td>${row.name}</td>
+							<td>${row.surname}</td>
+						</tr>
+					`;
+				}
+				$('#resultdata').html(dataHTML);
+			}, 'json')
+		}
+    </script>
+  </body>
+</html>
